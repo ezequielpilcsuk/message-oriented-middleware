@@ -17,13 +17,14 @@ func main() {
 
 	// Send a 'Hello' message from the dealer to the router.
 	// Here we send it as a frame ([]byte), with a FlagNone
+	msg := "8+3"
 	// flag to indicate there are no more frames following.
-	err = dealer.SendFrame([]byte("Hello"), goczmq.FlagNone)
+	err = dealer.SendFrame([]byte(msg), goczmq.FlagNone)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("dealer sent 'Hello'")
+	log.Printf("dealer sent '%v'", msg)
 
 	// Receive the reply.
 	reply, err := dealer.RecvMessage()
@@ -31,5 +32,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("dealer received '%s'", string(reply[0]))
+	log.Printf("dealer received '%v'", reply[0])
 }
