@@ -15,7 +15,7 @@ func main() {
 	}
 	defer router.Destroy()
 
-	log.Println("router created and bound to port 5555")
+	log.Println("Router created and bound to port 5555")
 
 	// Receive the message. Here we call RecvMessage, which
 	// will return the message as a slice of frames ([][]byte).
@@ -27,13 +27,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		go treatMessage(request, router)
 
 	}
 }
 
 func treatMessage(req [][]byte, router *goczmq.Sock) {
+	//TODO: Change message layout, Validate message, Accept different operations
 	msg := string(req[1])
 	log.Printf("router received '%s' from '%v'", msg, req[0])
 	ops := strings.Split(msg, "+")
