@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/zeromq/goczmq"
 	"log"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -20,28 +22,41 @@ func main() {
 	// Since this is a router socket that support async
 	// request / reply, the first frame of the message will
 	// be the routing frame.
-	request, err := router.RecvMessage()
-	if err != nil {
-		log.Fatal(err)
-	}
+	for {
+		request, err := router.RecvMessage()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	log.Printf("router received '%s' from '%v'", request[1], request[0])
+		go treatMessage(request, router)
+
+	}
+}
+
+func treatMessage(req [][]byte, router *goczmq.Sock) {
+	msg := string(req[1])
+	log.Printf("router received '%s' from '%v'", msg, req[0])
+	ops := strings.Split(msg, "+")
+	op1, _ := strconv.Atoi(ops[0])
+	op2, _ := strconv.Atoi(ops[1])
+	result := op1 + op2
 
 	// Send a reply. First we send the routing frame, which
 	// lets the dealer know which client to send the message.
 	// The FlagMore flag tells the router there will be more
 	// frames in this message.
-	err = router.SendFrame(request[0], goczmq.FlagMore)
+	err := router.SendFrame(req[0], goczmq.FlagMore)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("router sent 'World'")
+	log.Printf("router sent '%v'", result)
 
 	// Next send the reply. The FlagNone flag tells the router
 	// that this is the last frame of the message.
-	err = router.SendFrame([]byte("World"), goczmq.FlagNone)
+	err = router.SendFrame([]byte(string(result)), goczmq.FlagNone)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
