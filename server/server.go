@@ -25,13 +25,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		go treatRequest(request, router)
 
+		go treatRequest(request, router)
 	}
 }
 
 func treatRequest(req [][]byte, router *goczmq.Sock) {
-	//TODO: Change message layout, Validate message, Accept different operations
 	client := net.IPv4(req[0][0], req[0][1], req[0][2], req[0][3])
 	msg := string(req[1])
 	log.Printf("router received '%s' from '%v'", msg, client)
@@ -49,28 +48,24 @@ func treatRequest(req [][]byte, router *goczmq.Sock) {
 		for i := 1; i < len(components); i++ {
 			value, _ := strconv.Atoi(components[i])
 			result += value
-			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
 		}
 	case "sub":
 		result, _ = strconv.Atoi(components[1])
 		for i := 2; i < len(components); i++ {
 			value, _ := strconv.Atoi(components[i])
 			result -= value
-			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
 		}
 	case "mul":
 		result, _ = strconv.Atoi(components[1])
 		for i := 2; i < len(components); i++ {
 			value, _ := strconv.Atoi(components[i])
 			result *= value
-			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
 		}
 	case "div":
 		result, _ = strconv.Atoi(components[1])
 		for i := 2; i < len(components); i++ {
 			value, _ := strconv.Atoi(components[i])
 			result /= value
-			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
 		}
 	default:
 		log.Printf("operation not supported from '%v'", client)
@@ -78,9 +73,7 @@ func treatRequest(req [][]byte, router *goczmq.Sock) {
 		return
 	}
 
-	log.Printf("Sending %v\n", result)
 	sendMessage(req[0], strconv.Itoa(result), router)
-
 }
 
 func validateRequest(msg string) bool {
@@ -98,7 +91,7 @@ func sendMessage(sender []byte, message string, router *goczmq.Sock) {
 	}
 
 	log.Printf("router sent '%v'", message)
-	
+
 	err = router.SendFrame([]byte(message), goczmq.FlagNone)
 	if err != nil {
 		log.Fatal(err)
