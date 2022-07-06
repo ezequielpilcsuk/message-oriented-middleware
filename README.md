@@ -2,8 +2,6 @@
 
 By: Ezequiel Pilcsuk da Rosa (17203126) and Gabriel Soares Flores (17200443)
 
-
-
 This is a simple implementation of an integer calculator using ZeroMQ to implement a message oriented middleware.
 
 Message layout:

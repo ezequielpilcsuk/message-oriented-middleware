@@ -65,7 +65,9 @@ func treatRequest(req [][]byte, router *goczmq.Sock) {
 		result, _ = strconv.Atoi(components[1])
 		for i := 2; i < len(components); i++ {
 			value, _ := strconv.Atoi(components[i])
-			result /= value
+			if value != 0 {
+				result /= value
+			}
 		}
 	default:
 		log.Printf("operation not supported from '%v'", client)
