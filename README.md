@@ -1,6 +1,6 @@
 # message-oriented-middleware
 
-By: Ezequiel Pilcsuk da Rosa and Gabriel Soares Flores
+By: Ezequiel Pilcsuk da Rosa (17203126) and Gabriel Soares Flores (17200443)
 
 
 
