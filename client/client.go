@@ -25,8 +25,11 @@ func main() {
 		fmt.Printf("No arguments passed. Requesting operation:\n")
 		msg = "8+3"
 	} else {
-		msg = os.Args[1]
-		fmt.Printf("The message was %v\n", msg)
+		for i := 1; i < len(os.Args); i++ {
+			msg += fmt.Sprintf("%v ", os.Args[i])
+		}
+		msg = msg[:len(msg)-1]
+		//fmt.Printf("The message was %v\n", msg)
 	}
 
 	// flag to indicate there are no more frames following.
@@ -44,6 +47,9 @@ func main() {
 	}
 
 	//TODO: Treat response to properly display it
-	resp, _ := strconv.Atoi(string(reply[0]))
-	log.Printf("dealer received '%v'", resp)
+	resp := string(reply[0])
+
+	got, _ := strconv.Atoi(resp)
+
+	log.Printf("result: %v", got)
 }

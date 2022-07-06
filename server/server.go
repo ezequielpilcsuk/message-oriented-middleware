@@ -1,14 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"github.com/zeromq/goczmq"
 	"log"
+	"net"
 	"strconv"
 	"strings"
 )
 
 func main() {
 	// Create a router socket and bind it to port 5555.
+	fmt.Println(strconv.Itoa(-4))
 	router, err := goczmq.NewRouter("tcp://*:5555")
 	if err != nil {
 		log.Fatal(err)
@@ -17,46 +20,87 @@ func main() {
 
 	log.Println("Router created and bound to port 5555")
 
-	// Receive the message. Here we call RecvMessage, which
-	// will return the message as a slice of frames ([][]byte).
-	// Since this is a router socket that support async
-	// request / reply, the first frame of the message will
-	// be the routing frame.
 	for {
 		request, err := router.RecvMessage()
 		if err != nil {
 			log.Fatal(err)
 		}
-		go treatMessage(request, router)
+		go treatRequest(request, router)
 
 	}
 }
 
-func treatMessage(req [][]byte, router *goczmq.Sock) {
+func treatRequest(req [][]byte, router *goczmq.Sock) {
 	//TODO: Change message layout, Validate message, Accept different operations
+	client := net.IPv4(req[0][0], req[0][1], req[0][2], req[0][3])
 	msg := string(req[1])
-	log.Printf("router received '%s' from '%v'", msg, req[0])
-	ops := strings.Split(msg, "+")
-	op1, _ := strconv.Atoi(ops[0])
-	op2, _ := strconv.Atoi(ops[1])
-	result := op1 + op2
+	log.Printf("router received '%s' from '%v'", msg, client)
 
-	// Send a reply. First we send the routing frame, which
-	// lets the dealer know which client to send the message.
-	// The FlagMore flag tells the router there will be more
-	// frames in this message.
-	err := router.SendFrame(req[0], goczmq.FlagMore)
+	if !validateRequest(msg) {
+		log.Printf("invalid request '%s' from '%v'", msg, client)
+		sendMessage(req[0], "invalid request", router)
+		return
+	}
+
+	result := 0
+	components := strings.Split(msg, " ")
+	switch components[0] {
+	case "add":
+		for i := 1; i < len(components); i++ {
+			value, _ := strconv.Atoi(components[i])
+			result += value
+			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
+		}
+	case "sub":
+		result, _ = strconv.Atoi(components[1])
+		for i := 2; i < len(components); i++ {
+			value, _ := strconv.Atoi(components[i])
+			result -= value
+			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
+		}
+	case "mul":
+		result, _ = strconv.Atoi(components[1])
+		for i := 2; i < len(components); i++ {
+			value, _ := strconv.Atoi(components[i])
+			result *= value
+			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
+		}
+	case "div":
+		result, _ = strconv.Atoi(components[1])
+		for i := 2; i < len(components); i++ {
+			value, _ := strconv.Atoi(components[i])
+			result /= value
+			fmt.Printf("components[i] = %v\nresult = %v\nelem = %v\n", components[i], result, value)
+		}
+	default:
+		log.Printf("operation not supported from '%v'", client)
+		sendMessage(req[0], "invalid operation", router)
+		return
+	}
+
+	log.Printf("Sending %v\n", result)
+	sendMessage(req[0], strconv.Itoa(result), router)
+
+}
+
+func validateRequest(msg string) bool {
+	components := strings.Split(msg, " ")
+	if len(components) <= 2 {
+		return false
+	}
+	return true
+}
+
+func sendMessage(sender []byte, message string, router *goczmq.Sock) {
+	err := router.SendFrame(sender, goczmq.FlagMore)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("router sent '%v'", result)
-
-	// Next send the reply. The FlagNone flag tells the router
-	// that this is the last frame of the message.
-	err = router.SendFrame([]byte(string(result)), goczmq.FlagNone)
+	log.Printf("router sent '%v'", message)
+	
+	err = router.SendFrame([]byte(message), goczmq.FlagNone)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
