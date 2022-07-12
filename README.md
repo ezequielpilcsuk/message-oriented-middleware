@@ -18,7 +18,7 @@ add 1 2     -> 3
 add 1 2 3   -> 6
 mul -1 1    -> -1
 
-Installation:
+# Installation:
 
 sudo apt-get install libczmq-dev
 sudo apt-get install libzmq3-dev
