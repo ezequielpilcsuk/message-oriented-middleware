@@ -21,13 +21,16 @@ mul -1 1    -> -1
 # Installation:
 
 sudo apt-get install libczmq-dev
+
 sudo apt-get install libzmq3-dev
+
 go get gopkg.in/zeromq/goczmq.v4
+
 go get github.com/pebbe/zmq4
 
-Run server:
+# Run server:
 go run server/server.go
 
-Run client:
+# Run client:
 go run client/client.go op val1 val2
 go run client/client.go op val1 val2 val3 ...
