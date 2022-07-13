@@ -33,4 +33,5 @@ go run server/server.go
 
 # Run client:
 go run client/client.go op val1 val2
+
 go run client/client.go op val1 val2 val3 ...
